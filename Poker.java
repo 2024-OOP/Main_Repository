@@ -8,36 +8,41 @@ class Card {
 }
 
 class Deck {
-    // public static Card deck[] = new Card[52];
-    public static  LinkedList<Card> deck = new LinkedList<>();
     public final String[] SUIT = { "스페이드", "클로버", "다이아몬드", "하트" };
+    public static LinkedList<Card> deck = new LinkedList<>();
+    // 플레이어들끼리 공유하는 테이블의 카드 5장
+    public static LinkedList<Card> shared = new LinkedList<>();
 
     Deck() {
-        for (int i = 0; i < SUIT.length; ++i) { // 카드 덱 생성
+        initialize();
+    }
+
+    // 게임 초기화
+    void initialize() {
+        deck.clear();
+        shared.clear();
+
+        deckGenerate();
+        Collections.shuffle(deck); // 덱 셔플
+    }
+    
+    // 카드 덱 생성
+    void deckGenerate() {
+        for (int i = 0; i < SUIT.length; ++i) { 
             for (int j = 0; j < 13; ++j) {
                 Card card = new Card();
                 card.suit = SUIT[i];
                 card.number = j + 1;
                 deck.add(card);
-                /*
-                 * deck[i * 13 + j] = new Card();
-                 * deck[i * 13 + j].suit = SUIT[i];
-                 * deck[i * 13 + j].number = j + 1;
-                 */
             }
         }
     }
-    
-    // 플레이어들끼리 공유하는 카드 5장
-    public static LinkedList<Card> shared = new LinkedList<>();
-    void table() { // 5장의 카드를 공유하는 테이블 메소드 제작
+
+    // 테이블에 5장의 카드 깔기
+    void table() { 
     	for (int i = 0; i < 5; ++i) {
     		shared.add(draw());
     	}
-    }
-
-    void shuffle() { // 덱 셔플
-        Collections.shuffle(deck);
     }
 
     static Card draw() {
@@ -56,7 +61,7 @@ class Player {
     }
 
     void drawing() {
-    	hands.addAll(Deck.shared);
+    	hands.addAll(Deck.shared); // table의 패 공유 (player의 패에 추가)
         for (int i = 0; i < 2; ++i) {
             hands.add(Deck.draw());
         }
@@ -228,7 +233,7 @@ public class Poker {
 
     public static void main(String[] args) {
         Deck deck = new Deck();
-        deck.shuffle(); // 초기 설정
+        deck.initialize(); // 초기 설정
         deck.table();
 
         Scanner scanner = new Scanner(System.in);
@@ -245,5 +250,6 @@ public class Poker {
             displayResult(rank);
         }
 
+        scanner.close();
     }
 }
