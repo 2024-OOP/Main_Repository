@@ -8,7 +8,7 @@ class Card {
 
 class Deck {
     // public static Card deck[] = new Card[52];
-    public static  LinkedList<Card> deck = new LinkedList<>();
+    public static LinkedList<Card> deck = new LinkedList<>();
     public final String[] SUIT = { "스페이드", "클로버", "다이아몬드", "하트" };
 
     Deck() {
@@ -108,7 +108,7 @@ public class Poker {
             }
             if (sortedNum.get(0) == 1 && sortedNum.get(1) == 10) { // [A, 10, J, Q, K]
                 straight = true;
-            }
+            } // 1 10 11 12 13
         }
 
         // flush 여부 판정
@@ -211,16 +211,37 @@ public class Poker {
         System.out.println("Rank: " + rankString);
     }
 
+    static Player[] playerGenerating(int n) {
+        Player[] players = new Player[n];
+        for (int i = 0; i < n; ++i) {
+            players[i] = new Player();
+        }
+        return players;
+    }
+
     public static void main(String[] args) {
         Deck deck = new Deck();
         deck.shuffle(); // 초기 설정
 
+        int n = 3;
+        Player[] players = new Player[n];
+        players = playerGenerating(n);
+
+        for (int i = 0; i < n; ++i) {
+            players[i].drawing();
+            players[i].getHands();
+            int rank = bestRank(players[i].hands);
+            displayResult(rank);
+        }
+
+        /*
         Player player1 = new Player();
         player1.drawing();
         player1.getHands();
 
         int rank = bestRank(player1.hands);
         displayResult(rank);
+         */
 
     }
 }
