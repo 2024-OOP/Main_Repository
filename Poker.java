@@ -1,5 +1,6 @@
 import java.util.LinkedList;
 import java.util.Collections;
+import java.util.Scanner;
 
 class Card {
     public String suit;
@@ -8,7 +9,7 @@ class Card {
 
 class Deck {
     // public static Card deck[] = new Card[52];
-    public static LinkedList<Card> deck = new LinkedList<>();
+    public static  LinkedList<Card> deck = new LinkedList<>();
     public final String[] SUIT = { "스페이드", "클로버", "다이아몬드", "하트" };
 
     Deck() {
@@ -25,6 +26,14 @@ class Deck {
                  */
             }
         }
+    }
+    
+    // 플레이어들끼리 공유하는 카드 5장
+    public static LinkedList<Card> shared = new LinkedList<>();
+    void table() { // 5장의 카드를 공유하는 테이블 메소드 제작
+    	for (int i = 0; i < 5; ++i) {
+    		shared.add(draw());
+    	}
     }
 
     void shuffle() { // 덱 셔플
@@ -47,13 +56,10 @@ class Player {
     }
 
     void drawing() {
-        for (int i = 0; i < 7; ++i) {
-            draw();
+    	hands.addAll(Deck.shared);
+        for (int i = 0; i < 2; ++i) {
+            hands.add(Deck.draw());
         }
-    }
-
-    void draw() {
-        hands.add(Deck.draw());
     }
 
     void getHands() {
@@ -108,7 +114,7 @@ public class Poker {
             }
             if (sortedNum.get(0) == 1 && sortedNum.get(1) == 10) { // [A, 10, J, Q, K]
                 straight = true;
-            } // 1 10 11 12 13
+            }
         }
 
         // flush 여부 판정
@@ -210,7 +216,8 @@ public class Poker {
 
         System.out.println("Rank: " + rankString);
     }
-
+    
+    // 플레이어 다수 생성
     static Player[] playerGenerating(int n) {
         Player[] players = new Player[n];
         for (int i = 0; i < n; ++i) {
@@ -222,8 +229,12 @@ public class Poker {
     public static void main(String[] args) {
         Deck deck = new Deck();
         deck.shuffle(); // 초기 설정
+        deck.table();
 
-        int n = 3;
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("플레이어 수를 입력해주세요. ");
+        int n = scanner.nextInt();
+       
         Player[] players = new Player[n];
         players = playerGenerating(n);
 
@@ -233,15 +244,6 @@ public class Poker {
             int rank = bestRank(players[i].hands);
             displayResult(rank);
         }
-
-        /*
-        Player player1 = new Player();
-        player1.drawing();
-        player1.getHands();
-
-        int rank = bestRank(player1.hands);
-        displayResult(rank);
-         */
 
     }
 }
