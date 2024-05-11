@@ -1,80 +1,10 @@
-import java.util.LinkedList;
-import java.util.List;
+package Main_Repository;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
-
-class Card {
-    public String suit;
-    public int number;
-}
-
-class Deck {
-    public final String[] SUIT = { "스페이드", "클로버", "다이아몬드", "하트" };
-    public static LinkedList<Card> deck = new LinkedList<>();
-    // 플레이어들끼리 공유하는 테이블의 카드 5장
-    public static LinkedList<Card> table = new LinkedList<>();
-
-    Deck() {
-        initialize();
-    }
-
-    // 게임 초기화
-    void initialize() {
-        deck.clear();
-        table.clear();
-
-        deckGenerate();
-        Collections.shuffle(deck); // 덱 셔플
-    }
-    
-    // 카드 덱 생성
-    void deckGenerate() {
-        for (int i = 0; i < SUIT.length; ++i) { 
-            for (int j = 0; j < 13; ++j) {
-                Card card = new Card();
-                card.suit = SUIT[i];
-                card.number = j + 1;
-                deck.add(card);
-            }
-        }
-    }
-
-    // 테이블에 5장의 카드 깔기
-    void tableSet() { 
-        for (int i = 0; i < 5; ++i) {
-            table.add(draw());
-        }
-    }
-
-    static Card draw() {
-        Card card = deck.getLast();
-        deck.removeLast();
-
-        return card;
-    }
-}
-
-class Player {
-    LinkedList<Card> hands = new LinkedList<>(); // 보유한 패
-
-    void clear() { // 패 초기화
-        hands.clear();
-    }
-
-    void drawing() {
-    	hands.addAll(Deck.table); // table의 패 공유 (player의 패에 추가)
-        for (int i = 0; i < 2; ++i) {
-            hands.add(Deck.draw());
-        }
-    }
-
-    void getHands() {
-        for (int i = 0; i < hands.size(); ++i) {
-            System.out.println(hands.get(i).suit + " " + hands.get(i).number);
-        }
-    }
-}
 
 public class Poker {
     public static int cardRank(LinkedList<Card> cards) {
@@ -168,7 +98,7 @@ public class Poker {
          * 7장의 카드 중 5장을 선택하는 모든 조합을 확인
          * i = 0, j = 1 ~ 6까지 검사
          * i = 1, j = 2 ~ 6까지 검사
-         * ...
+         * ... 
          * i = 5, j = 6까지 검사
          */ 
     
