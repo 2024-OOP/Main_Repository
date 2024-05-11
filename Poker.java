@@ -1,4 +1,6 @@
 import java.util.LinkedList;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
@@ -11,7 +13,7 @@ class Deck {
     public final String[] SUIT = { "스페이드", "클로버", "다이아몬드", "하트" };
     public static LinkedList<Card> deck = new LinkedList<>();
     // 플레이어들끼리 공유하는 테이블의 카드 5장
-    public static LinkedList<Card> shared = new LinkedList<>();
+    public static LinkedList<Card> table = new LinkedList<>();
 
     Deck() {
         initialize();
@@ -20,7 +22,7 @@ class Deck {
     // 게임 초기화
     void initialize() {
         deck.clear();
-        shared.clear();
+        table.clear();
 
         deckGenerate();
         Collections.shuffle(deck); // 덱 셔플
@@ -39,10 +41,10 @@ class Deck {
     }
 
     // 테이블에 5장의 카드 깔기
-    void table() { 
-    	for (int i = 0; i < 5; ++i) {
-    		shared.add(draw());
-    	}
+    void tableSet() { 
+        for (int i = 0; i < 5; ++i) {
+            table.add(draw());
+        }
     }
 
     static Card draw() {
@@ -61,7 +63,7 @@ class Player {
     }
 
     void drawing() {
-    	hands.addAll(Deck.shared); // table의 패 공유 (player의 패에 추가)
+    	hands.addAll(Deck.table); // table의 패 공유 (player의 패에 추가)
         for (int i = 0; i < 2; ++i) {
             hands.add(Deck.draw());
         }
@@ -159,7 +161,7 @@ public class Poker {
 
         return rank;
     }
-
+    
     public static int bestRank(LinkedList<Card> cards) {
         int bestRank = 9; // 가장 낮은 랭크로 초기화
         /*
@@ -169,7 +171,7 @@ public class Poker {
          * ...
          * i = 5, j = 6까지 검사
          */ 
-
+    
         for (int i = 0; i < cards.size(); ++i) {
             for (int j = i + 1; j < cards.size(); ++j) {
                 LinkedList<Card> temp = new LinkedList<>(cards); // temp에 cards의 값 복사
@@ -186,7 +188,7 @@ public class Poker {
         }
         return bestRank;
     }
-
+    
     static void displayResult(int rank) {
         String rankString;
         switch (rank) {
@@ -221,6 +223,47 @@ public class Poker {
 
         System.out.println("Rank: " + rankString);
     }
+
+    public static void determineWinner(Player[] players) {
+    int minRank = Integer.MAX_VALUE; // 초기 최소 랭크값 설정
+    List<Integer> winnersIndex = new ArrayList<>(); // 우승자의 인덱스를 저장할 리스트
+
+    // 각 플레이어의 최종 순위를 계산하여 최소 랭크를 찾음
+    for (int i = 0; i < players.length; i++) {
+        int rank = bestRank(players[i].hands); // 최종 랭크 계산
+        if (rank < minRank) {
+            minRank = rank; // 더 낮은 순위 발견 시 최소 랭크 업데이트
+            winnersIndex.clear(); // 이전 우승자 인덱스 초기화
+            winnersIndex.add(i); // 현재 플레이어를 우승자로 설정
+        } else if (rank == minRank) {
+            winnersIndex.add(i); // 최소 랭크를 가진 플레이어를 우승자로 추가
+        }
+    }
+
+    // 우승자 출력
+    if (winnersIndex.size() == 1) {
+        System.out.println("우승자는 플레이어 " + (winnersIndex.get(0) + 1) + "입니다!");
+    } else {
+        // 무승부 판별
+        boolean draw = true;
+        for (int i = 1; i < winnersIndex.size(); i++) {
+            if (!players[winnersIndex.get(i)].hands.equals(players[winnersIndex.get(0)].hands)) {
+                draw = false;
+                break;
+            }
+        }
+        if (draw) {
+            System.out.println("무승부입니다!");
+        } else {
+            // 최소 랭크를 가진 플레이어 출력
+            System.out.print("동점자: ");
+            for (int i = 0; i < winnersIndex.size(); i++) {
+                System.out.print("플레이어 " + (winnersIndex.get(i) + 1) + ", ");
+            }
+            System.out.println("입니다!");
+        }
+    }
+}
     
     // 플레이어 다수 생성
     static Player[] playerGenerating(int n) {
@@ -234,12 +277,12 @@ public class Poker {
     public static void main(String[] args) {
         Deck deck = new Deck();
         deck.initialize(); // 초기 설정
-        deck.table();
+        deck.tableSet();
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("플레이어 수를 입력해주세요. ");
         int n = scanner.nextInt();
-       
+
         Player[] players = new Player[n];
         players = playerGenerating(n);
 
@@ -249,6 +292,8 @@ public class Poker {
             int rank = bestRank(players[i].hands);
             displayResult(rank);
         }
+
+        determineWinner(players);
 
         scanner.close();
     }
