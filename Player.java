@@ -1,10 +1,10 @@
-package Main_Repository;
+package MainRepository;
 
 import java.util.LinkedList;
 
 public class Player {
     LinkedList<Card> hands = new LinkedList<>();
-
+    
     void clear() {
         hands.clear();
     }

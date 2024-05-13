@@ -1,4 +1,4 @@
-package Main_Repository;
+package MainRepository;
 
 public class Card {
     public String suit;

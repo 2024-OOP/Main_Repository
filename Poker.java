@@ -1,4 +1,4 @@
-package Main_Repository;
+package MainRepository;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,13 +36,14 @@ public class Poker {
             }
         }
 
-        // straight 여부 판정
-        LinkedList<Integer> sortedNum = new LinkedList<>(); // sortedNum: 숫자별 정렬
+        // 숫자별 정렬
+        LinkedList<Integer> sortedNum = new LinkedList<>();
         for (int i = 0; i < 5; ++i) {
             sortedNum.add(cards.get(i).number); // sortedNum에 값 복사: cards의 number값
         }
-        Collections.sort(sortedNum);
+        Collections.sort(sortedNum);        
 
+        // straight 여부 판정
         boolean straight = false;
         if (pairCount == 0) {
             // [1, 2, 3, 4, 5], [2, 3, 4, 5, 6], …, [9, 10, 11, 12, 13]: 가장 큰 수와 가장 작은 수의 차가 4
@@ -67,33 +68,147 @@ public class Poker {
             flush = true;
         }
 
-        // rank: 숫자가 작을 수록 높은 순위
-        int rank;
+        /* 
+         * rank: 숫자가 클수록 높은 순위
+         * 총 8자리:
+         * 1~2: 족보
+         * 3~4: 페어(1)
+         * 5~6: 페어(2)
+         * 7~8: 하이 카드
+         */ 
+        
+        int rank = 2_00_00_00;
         if (straight && flush) {
-            rank = 1;
-        } else if (pairCount == 6) {
-            rank = 2;
-        } else if (pairCount == 4) {
-            rank = 3;
+            rank = 10_00_00_00;
+        } else if (pairCount == 6) { // 포카드
+            rank = 9_00_00_00;
+        } else if (pairCount == 4) { // 풀하우스
+            rank = 8_00_00_00;
         } else if (flush) {
-            rank = 4;
+            rank = 7_00_00_00;
         } else if (straight) {
-            rank = 5;
+            rank = 6_00_00_00;
         } else if (pairCount == 3) {
-            rank = 6;
+            rank = 5_00_00_00;
         } else if (pairCount == 2) {
-            rank = 7;
+            rank = 4_00_00_00;
         } else if (pairCount == 1) {
-            rank = 8;
-        } else {
-            rank = 9;
+            rank = 3_00_00_00;
+        } else {                     // 하이 카드(족보)
+            rank = 2_00_00_00;
         }
+
+        // highCard 정보를 덧셈 형식으로 추가, 형식 예시: rank = 700 + highCard;
+        rank += highCard(sortedNum, rank);
 
         return rank;
     }
+
+    // 각 족보의 하이 카드 return: 같은 rank일 때 족보를 따져보는 용도
+    public static int highCard(LinkedList<Integer> sortedNum, int rank) {
+        // 계산의 편리를 위해 sortedNum의 1(A) -> 14로 변환
+        for (int i = 0; i < sortedNum.size(); ++i) {
+            if (sortedNum.get(i) == 1) {
+                sortedNum.set(i, 14);
+            }
+        }
+        Collections.sort(sortedNum);
+
+        switch (rank) {
+            // 5장 내에서 판단해야 하는 경우 중 스트레이트 플러시, 플러시, 스트레이트, 하이 카드
+            case 10_00_00_00:
+            case 7_00_00_00:
+            case 6_00_00_00:
+            case 2_00_00_00:
+                return sortedNum.getLast();
+            // 풀하우스
+            case 8_00_00_00:
+                /* 
+                * 풀하우스: 트리플 + 투페어, 트리플의 족보 > 투페어의 족보 > 키커의 족보
+                * 2 2 2 9 9 < 3 3 4 4 4
+                * -> 3~4: 트리플, 5~6: 페어, 키커 별도 확인: 5장씩 비교해서 비교 불가
+                * 
+                * 어떤 수가 트리플을 이루는지 확인
+                * arr1: 2 2 2 9 9 < arr2: 3 3 4 4 4,
+                * arr1[0] == arr1[2], arr2[0] != arr2[2]
+                */
+                if (sortedNum.get(0) == sortedNum.get(2)) {
+                    return sortedNum.get(2) * 10000 + sortedNum.get(4) * 100;
+                } else {
+                    return sortedNum.get(2) * 10000 + sortedNum.get(0) * 100;
+                }
+            // 포카드, 트리플, 페어 등 5장 내에서 판단하지 않을 경우
+            default:
+                switch (rank) {
+                    // 포카드: 5 5 5 5 6 / 5 6 6 6 6
+                    case 9_00_00_00:
+                        // 5 5 5 5 6일 경우
+                        if (sortedNum.get(0) == sortedNum.get(3)) {
+                            return (sortedNum.get(0) * 10000 + sortedNum.get(4)); // 포카드 + 키커
+                        // 5 6 6 6 6일 경우
+                        } else { 
+                            return sortedNum.get(4) * 10000 + sortedNum.get(0); // 포카드 + 키커
+                        }
+                    // 트리플: 3 3 3 4 5 / 3 4 4 4 5 / 3 4 5 5 5
+                    case 5_00_00_00:
+                        // 3 3 3 4 5일 경우
+                        if (sortedNum.get(0) == sortedNum.get(2)) {
+                            // 트리플 값 + 키커1 + 키커2
+                            return (sortedNum.get(0) * 10000 + sortedNum.get(4) * 100 + sortedNum.get(3));
+                        } else if (sortedNum.get(1) == sortedNum.get(3)) {
+                        // 3 4 4 4 5일 경우 
+                            return (sortedNum.get(1) * 10000 + sortedNum.get(4) * 100 + sortedNum.get(0));
+                        } else { // 3 4 5 5 5일 경우
+                            return (sortedNum.get(2) * 10000 + sortedNum.get(1) * 100 + sortedNum.get(0));
+                        }
+                    // 원 페어: 2 2 3 4 5 / 2 3 3 4 5 / 2 3 4 4 5 / 2 3 4 5 5
+                    case 3_00_00_00:
+                        List<Integer> kickers = new ArrayList<>();
+                        int pairIndex = -1;
+                        // 페어 찾기
+                        for (int i = 0; i < 4; i++) {
+                            if (sortedNum.get(i) == sortedNum.get(i + 1)) {
+                                pairIndex = sortedNum.get(i);
+                                break;
+                            }
+                        }
+                        // 킥커 수집
+                        for (int i = 0; i < 5; i++) {
+                            if (sortedNum.get(i) != pairIndex) {
+                                kickers.add(sortedNum.get(i));
+                            }
+                        }
+                        Collections.sort(kickers);
+                        // 페어 + 3개 킥커        
+                        return (pairIndex * 10000 + kickers.get(2) * 100 + kickers.get(1) + kickers.get(0)); 
+                    // 투 페어: 2 2 3 3 4 / 2 2 3 4 4 / 2 3 3 4 4
+                    case 4_00_00_00:              
+                        int firstPair, secondPair, kicker;
+                        // 2 2 3 3 4일 경우
+                        if (sortedNum.get(0) == sortedNum.get(1) && sortedNum.get(2) == sortedNum.get(3)) {
+                            firstPair = sortedNum.get(2);
+                            secondPair = sortedNum.get(0);
+                            kicker = sortedNum.get(4);
+                        // 2 2 3 4 4일 경우
+                        } else if (sortedNum.get(0) == sortedNum.get(1) && 
+                                    sortedNum.get(3) == sortedNum.get(4)) { 
+                            firstPair = sortedNum.get(3);
+                            secondPair = sortedNum.get(0);
+                            kicker = sortedNum.get(2);
+                        } else { // 2 3 3 4 4일 경우
+                            firstPair = sortedNum.get(4);
+                            secondPair = sortedNum.get(2);
+                            kicker = sortedNum.get(0);
+                        }
+                        return (firstPair * 10000 + secondPair * 100 + kicker); // 페어1 > 페어2 > 키커
+                }
+                return rank;
+        }
+        
+    }
     
     public static int bestRank(LinkedList<Card> cards) {
-        int bestRank = 9; // 가장 낮은 랭크로 초기화
+        int bestRank = 2_00_00_00; // 가장 낮은 랭크로 초기화
         /*
          * 7장의 카드 중 5장을 선택하는 모든 조합을 확인
          * i = 0, j = 1 ~ 6까지 검사
@@ -111,7 +226,7 @@ public class Poker {
                 temp.remove(i);
 
                 int rank = cardRank(temp); // 선별된 5장의 카드 랭크 계산
-                if (rank < bestRank) {
+                if (rank > bestRank) {
                     bestRank = rank; // 더 좋은 랭크가 나오면 bestRank에 업데이트
                 }
             }
@@ -121,29 +236,29 @@ public class Poker {
     
     static void displayResult(int rank) {
         String rankString;
-        switch (rank) {
-            case 1:
+        switch (rank / 1_00_00_00) {
+            case 10:
                 rankString = "Straight Flush";
                 break;
-            case 2:
+            case 9:
                 rankString = "Four of a Kind";
                 break;
-            case 3:
+            case 8:
                 rankString = "Full House";
                 break;
-            case 4:
+            case 7:
                 rankString = "Flush";
                 break;
-            case 5:
+            case 6:
                 rankString = "Straight";
                 break;
-            case 6:
+            case 5:
                 rankString = "Three of a Kind";
                 break;
-            case 7:
+            case 4:
                 rankString = "Two Pair";
                 break;
-            case 8:
+            case 3:
                 rankString = "One Pair";
                 break;
             default:
@@ -155,18 +270,18 @@ public class Poker {
     }
 
     public static void determineWinner(Player[] players) {
-    int minRank = Integer.MAX_VALUE; // 초기 최소 랭크값 설정
+    int maxRank = 0; // 최대 랭크값 초기화
     List<Integer> winnersIndex = new ArrayList<>(); // 우승자의 인덱스를 저장할 리스트
 
-    // 각 플레이어의 최종 순위를 계산하여 최소 랭크를 찾음
+    // 각 플레이어의 최종 순위를 계산하여 최대 랭크를 찾음
     for (int i = 0; i < players.length; i++) {
         int rank = bestRank(players[i].hands); // 최종 랭크 계산
-        if (rank < minRank) {
-            minRank = rank; // 더 낮은 순위 발견 시 최소 랭크 업데이트
+        if (rank > maxRank) {
+            maxRank = rank; // 더 높은 순위 발견 시 최대 랭크 업데이트
             winnersIndex.clear(); // 이전 우승자 인덱스 초기화
             winnersIndex.add(i); // 현재 플레이어를 우승자로 설정
-        } else if (rank == minRank) {
-            winnersIndex.add(i); // 최소 랭크를 가진 플레이어를 우승자로 추가
+        } else if (rank == maxRank) {
+            winnersIndex.add(i); // 최대 랭크를 가진 플레이어를 우승자로 추가
         }
     }
 
@@ -174,24 +289,12 @@ public class Poker {
     if (winnersIndex.size() == 1) {
         System.out.println("우승자는 플레이어 " + (winnersIndex.get(0) + 1) + "입니다!");
     } else {
-        // 무승부 판별
-        boolean draw = true;
-        for (int i = 1; i < winnersIndex.size(); i++) {
-            if (!players[winnersIndex.get(i)].hands.equals(players[winnersIndex.get(0)].hands)) {
-                draw = false;
-                break;
-            }
-        }
-        if (draw) {
-            System.out.println("무승부입니다!");
-        } else {
-            // 최소 랭크를 가진 플레이어 출력
-            System.out.print("동점자: ");
+        System.out.print("동점자(Split): ");
             for (int i = 0; i < winnersIndex.size(); i++) {
                 System.out.print("플레이어 " + (winnersIndex.get(i) + 1) + ", ");
             }
             System.out.println("입니다!");
-        }
+        
     }
 }
     
