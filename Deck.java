@@ -3,42 +3,24 @@ package MainRepository;
 import java.util.Collections;
 import java.util.LinkedList;
 
-public class Deck {
-    public final String[] SUIT = { "스페이드", "클로버", "다이아몬드", "하트" };
-    public static LinkedList<Card> deck = new LinkedList<>();
-    public static LinkedList<Card> table = new LinkedList<>();
+abstract public class Deck {
+    private static LinkedList<Card> deck = new LinkedList<>();
 
-    public Deck() {
-        initialize();
-    }
- 
+    abstract void deckGenerate();
     void initialize() {
         deck.clear();
-        table.clear();
         deckGenerate();
         Collections.shuffle(deck);
-    }
-
-    void deckGenerate() {
-        for (int i = 0; i < SUIT.length; ++i) {
-            for (int j = 0; j < 13; ++j) {
-                Card card = new Card();
-                card.suit = SUIT[i];
-                card.number = j + 1;
-                deck.add(card);
-            }
-        }
-    }
-
-    void tableSet() {
-        for (int i = 0; i < 5; ++i) {
-            table.add(draw());
-        }
     }
 
     static Card draw() {
         Card card = deck.getLast();
         deck.removeLast();
         return card;
+    }
+
+    // 외부에서 deck으로의 접근 제공
+    protected static LinkedList<Card> getDeck() {
+        return deck; 
     }
 }

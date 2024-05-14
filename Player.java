@@ -10,9 +10,9 @@ public class Player {
     }
 
     void drawing() {
-        hands.addAll(Deck.table);
+        hands.addAll(PokerDeck.getTable());
         for (int i = 0; i < 2; ++i) {
-            hands.add(Deck.draw());
+            hands.add(PokerDeck.draw());
         }
     }
  
