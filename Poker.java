@@ -1,5 +1,6 @@
 package MainRepository;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Poker {    
@@ -66,7 +67,21 @@ public class Poker {
             displayResult(rank);
         }
 
-        Rank.determineWinner(players);
+        List<Integer> winnersIndex = Rank.determineWinner(players);
+
+        // 우승자 출력
+        if (winnersIndex.size() == 1) {
+            // 우승자 처리 로직
+            System.out.println("우승자는 플레이어 " + (winnersIndex.get(0) + 1) + "입니다!");
+        } else {
+            // 동점자 처리 로직
+            System.out.print("동점자(Split): ");
+                for (int i = 0; i < winnersIndex.size(); i++) {
+                    System.out.print("플레이어 " + (winnersIndex.get(i) + 1) + ", ");
+                }
+                System.out.println("입니다!");
+            
+        }
 
         scanner.close();
     }

@@ -229,7 +229,7 @@ public class Rank {
         return bestRank;
     }
     
-    public static void determineWinner(Player[] players) {
+    public static List<Integer> determineWinner(Player[] players) {
         int maxRank = 0; // 최대 랭크값 초기화
         List<Integer> winnersIndex = new ArrayList<>(); // 우승자의 인덱스를 저장할 리스트
     
@@ -244,17 +244,8 @@ public class Rank {
                 winnersIndex.add(i); // 최대 랭크를 가진 플레이어를 우승자로 추가
             }
         }
-    
-        // 우승자 출력
-        if (winnersIndex.size() == 1) {
-            System.out.println("우승자는 플레이어 " + (winnersIndex.get(0) + 1) + "입니다!");
-        } else {
-            System.out.print("동점자(Split): ");
-                for (int i = 0; i < winnersIndex.size(); i++) {
-                    System.out.print("플레이어 " + (winnersIndex.get(i) + 1) + ", ");
-                }
-                System.out.println("입니다!");
-            
-        }
+        
+        return winnersIndex;
+        
     }
 }
