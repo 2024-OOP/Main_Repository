@@ -73,7 +73,6 @@ public class StartScreen extends Screen {
                     }
                 }
             }
-        scanner.close();
         }
     }
 }

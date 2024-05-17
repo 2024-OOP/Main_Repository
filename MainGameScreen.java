@@ -145,7 +145,7 @@ public class MainGameScreen extends Screen {
     }
 
     public static void printScreen(Player[] players){
-        int turn = 1;
+        int turn = 3;
         int selectedPlayer = 0;
         Player selectedPlayerHands = players[0];
         Scanner scanner = new Scanner(System.in);
