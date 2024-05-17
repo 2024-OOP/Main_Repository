@@ -5,7 +5,7 @@ import java.util.LinkedList;
 
 
 class PokerDeck extends Deck {
-    public final String[] SUIT = { "스페이드", "클로버", "다이아몬드", "하트" };
+    public final String[] SUIT = { "♠", "♣", "◈", "♥" };
     static private LinkedList<Card> table = new LinkedList<>(); // 포커 테이블
 
     PokerDeck() {
