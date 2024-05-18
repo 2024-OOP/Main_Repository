@@ -6,7 +6,7 @@ class EndingScreen extends Screen{
     // 랭크 입력하면 문자열 반환해주는 함수
     static String rankOfCards(int rank) {
         String rankString;
-        switch (rank / 1_00_00_00) {
+        switch (rank / 1_00_00_00_00) {
             case 10:
                 rankString = "Straight Flush";
                 break;
